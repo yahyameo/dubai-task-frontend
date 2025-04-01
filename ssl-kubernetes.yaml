@@ -1,0 +1,48 @@
+
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert-dubaifrontend
+spec:
+  domains:
+    - front.dubai-task.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dubai-task-frontend-svc-ssl
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  selector:
+    app: dubai-task-frontend
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: managed-cert-ingress-dubaifrontend
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: dubai-frontend-ip
+    networking.gke.io/managed-certificates: managed-cert-dubaifrontend
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/v1beta1.FrontendConfig: ingress-security-config
+spec:
+  defaultBackend:
+    service:
+      name: dubai-task-frontend-svc-ssl
+      port:
+        number: 80
+---
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: ingress-security-config
+spec:
+  sslPolicy: gke-ingress-ssl-policy-https
+  redirectToHttps:
+    enabled: true

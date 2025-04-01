@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubai-task-frontend-deployment
+  labels:
+    app: dubai-task-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dubai-task-frontend
+  template:
+    metadata:
+      labels:
+        app: dubai-task-frontend
+    spec:
+      serviceAccountName: gke-sa
+      containers:
+        - name: dubai-task-frontend-container
+          image: asia-southeast1-docker.pkg.dev/GOOGLE_CLOUD_PROJECT/dubai-task-frontend/frontend:COMMIT_SHA
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 30
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dubai-task-frontend-service
+spec:
+  selector:
+    app: dubai-task-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

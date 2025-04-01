@@ -20,5 +20,5 @@ This is a simple React-based frontend for user authentication, built with:
 
 ### 📁 Clone the repo
 ```bash
-git clone <your-repo-url>
-cd frontend
+git clone https://github.com/yahyameo/dubai-task-frontend.git
+cd dubai-task-frontend
