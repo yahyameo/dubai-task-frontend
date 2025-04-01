@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -12,25 +12,45 @@ import {
   Stack,
 } from '@mui/material';
 import { Logout } from '@mui/icons-material';
+import api from '../api/axios';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<{ name: string; email: string } | null>(null);
 
   const logout = () => {
     localStorage.removeItem('token');
     navigate('/signin');
   };
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/users/profile');
+        setProfile(response.data.data); 
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        logout();
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   return (
     <Card elevation={4} sx={{ p: 3 }}>
       <CardContent>
         <Stack spacing={3} alignItems="center">
-          <Avatar sx={{ width: 72, height: 72, bgcolor: 'primary.main' }}>U</Avatar>
+          <Avatar sx={{ width: 72, height: 72, bgcolor: 'primary.main' }}>
+            {profile?.name?.charAt(0) || 'U'}
+          </Avatar>
           <Typography variant="h4" align="center" gutterBottom>
-            Welcome to the Application
+            Welcome, {profile?.name || 'User'}
           </Typography>
           <Typography variant="body1" align="center" color="text.secondary">
-            You are successfully signed in. This is your dashboard where you can manage your profile and settings.
+            {profile?.email
+              ? `You are signed in as ${profile.email}.`
+              : 'Loading profile...'}
           </Typography>
         </Stack>
         <Divider sx={{ my: 3 }} />
